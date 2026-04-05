@@ -92,8 +92,5 @@ df['Age'] = df['Age'].fillna(df['Age'].mean())
 df['Age'] = df['Age'].round().astype(int)
 
 df['Age'].unique()
-# In[ ]:
-
-
 
 
