@@ -1,0 +1,163 @@
+
+# In[32]:
+import pandas as pd
+import numpy as np
+
+
+# In[33]:
+df=pd.read_csv(r"C:\Users\niva\Downloads\Banking_Raw_Uncleaned_v4.csv")
+
+
+# In[34]:
+df.describe()
+
+
+# In[35]:
+df.isnull().sum()
+
+
+# In[36]:
+print(f"Rows before: {len(df)}")
+df = df.drop_duplicates(subset='Name', keep='first').sort_values('Name').reset_index(drop=True)
+
+print(f"Rows after: {len(df)}")
+
+
+# In[37]:
+df.drop(columns=['Client ID','IAId'], inplace=True)
+
+
+# In[38]:
+key = {1: "Man", 2: "Woman"}
+df['GenderId'] = df['GenderId'].replace(key) 
+
+
+# In[39]:
+key = {1: "Retail", 2: "Institutional",3:"Private Bank",4:"Commercial"}
+df['BRId'] = df['BRId'].replace(key) 
+
+
+# In[40]:
+df['Estimated Income'].skew()
+
+
+# In[41]:
+df['Estimated Income'] = df['Estimated Income'].fillna(
+    df.groupby(['BRId', 'GenderId'])['Estimated Income'].transform('median')
+)
+
+
+# In[42]:
+df['Credit Card Balance'].skew()
+
+
+# In[43]:
+df['Credit Card Balance'] = df['Credit Card Balance'].fillna(
+    df.groupby(['BRId', 'GenderId'])['Credit Card Balance'].transform('median')
+)
+
+
+# In[44]:
+df['Bank Loans'].skew()
+
+
+# In[45]:
+df['Bank Loans'] = df['Bank Loans'].fillna(
+    df.groupby(['BRId', 'GenderId'])['Bank Loans'].transform('median')
+)
+
+
+# In[46]:
+df['Nationality'] = df['Nationality'].fillna(
+    df.groupby(['Location ID', 'BRId'])['Nationality'].transform('first')
+)
+
+df['Nationality'] = df['Nationality'].fillna(df['Nationality'].mode()[0])
+
+
+# In[47]
+df['Nationality'].unique()
+
+
+# In[48]:
+key1 = {"EUROPEAN": "European", "asian": "Asian", "AUSTRALIAN": "Australian", "american": "American", "african": "African"}
+df['Nationality'] = df['Nationality'].replace(key1)
+
+
+# In[49]:
+df['Occupation'] = df['Occupation'].fillna(
+    df.groupby(['Nationality', 'BRId', 'Risk Weighting'])['Occupation'].transform('first')
+)
+
+df['Occupation'] = df['Occupation'].fillna(df['Occupation'].mode()[0])
+
+
+# In[50]:
+df['Loyalty Classification'] = df['Loyalty Classification'].fillna(
+    df.groupby(['Occupation', 'Nationality', 'BRId'])['Loyalty Classification'].transform('first')
+)
+
+df['Loyalty Classification'] = df['Loyalty Classification'].fillna(df['Loyalty Classification'].mode()[0])
+
+
+# In[51]:
+df['Loyalty Classification'].unique()
+
+
+# In[52]:
+key = {"gold": "Gold", "PLATINUM": "Platinum"}
+df['Loyalty Classification'] =df['Loyalty Classification'].replace(key) 
+
+
+# In[53]:
+df['Fee Structure'] = df['Fee Structure'].fillna(
+    df.groupby(['Loyalty Classification', 'Occupation', 'BRId'])['Fee Structure'].transform('first')
+)
+
+df['Fee Structure'] = df['Fee Structure'].fillna(df['Fee Structure'].mode()[0])
+
+
+# In[54]:
+df['Fee Structure'].unique()
+
+
+# In[55]:
+key2 = {"high": "High", "LOW": "Low"}
+df['Fee Structure'] =df['Fee Structure'].replace(key2) 
+
+
+# In[56]:
+df['Age'].skew()
+
+
+# In[57]:
+df['Age'] = df['Age'].where((df['Age'] >= 21) & (df['Age'] <= 65), other=np.nan)
+
+
+# In[62]:
+df['Age'] = df['Age'].fillna(
+    df.groupby(['Occupation', 'GenderId'])['Age'].transform('mean')
+)
+
+df['Age'] = df['Age'].fillna(df['Age'].mean())
+df['Age'] = df['Age'].round().astype(int)
+
+
+# In[63]:
+df['Age'].unique()
+
+
+# In[64]:
+df.sample(10)
+
+
+# In[66]:
+df.to_csv('Banking_Cleaned.csv', index=False)
+print("Saved to Banking_Cleaned.csv")
+
+
+# In[ ]:
+
+
+
+
